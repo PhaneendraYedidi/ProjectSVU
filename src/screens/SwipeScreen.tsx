@@ -78,7 +78,7 @@ const SwipeScreen: React.FC = () => {
                       onAnswer={isCorrect => handleAnswer(item.id, isCorrect)}
                     />
                   </View>
-                  <SideActionPanel />
+                  <SideActionPanel questionId={item.id} />
                 </View>
                 {showExplanationId === item.id && (
                   <ExplanationView explanation={item.explanation} />

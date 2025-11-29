@@ -3,12 +3,19 @@ import React from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import IconAction from './IconAction';
 import { spacing } from '../styles/theme';
+import { useQuestionStore } from '../store/questionStore';
 
-const SideActionPanel: React.FC = () => {
-  // These onPress handlers are just placeholders
+interface SideActionPanelProps {
+  questionId: string;
+}
+
+const SideActionPanel: React.FC<SideActionPanelProps> = ({ questionId }) => {
+  const { bookmarkedQuestionIds, toggleBookmark } = useQuestionStore();
+  const isBookmarked = bookmarkedQuestionIds.includes(questionId);
+
+  // These onPress handlers are just placeholders for now
   const handleLike = () => Alert.alert('Liked!');
   const handleDislike = () => Alert.alert('Disliked!');
-  const handleBookmark = () => Alert.alert('Bookmarked!');
   const handleComment = () => Alert.alert('Opening comments...');
   const handleShare = () => Alert.alert('Sharing...');
 
@@ -16,7 +23,12 @@ const SideActionPanel: React.FC = () => {
     <View style={styles.container}>
       <IconAction iconName="thumb-up-outline" label="Like" onPress={handleLike} />
       <IconAction iconName="thumb-down-outline" label="Dislike" onPress={handleDislike} />
-      <IconAction iconName="bookmark-outline" label="Bookmark" onPress={handleBookmark} />
+      <IconAction
+        iconName={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+        label="Bookmark"
+        onPress={() => toggleBookmark(questionId)}
+        isActive={isBookmarked}
+      />
       <IconAction iconName="comment-outline" label="Comment" onPress={handleComment} />
       <IconAction iconName="share-outline" label="Share" onPress={handleShare} />
     </View>
