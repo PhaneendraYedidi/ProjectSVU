@@ -2,6 +2,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import { Question } from '../data/questions';
 import { colors, spacing, typography } from '../styles/theme';
 import Option from './Option';
@@ -16,6 +22,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer }) => {
   const [isRevealed, setIsRevealed] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
+  const shake = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: shake.value }],
+    };
+  });
+
   const handleOptionPress = (optionId: string) => {
     if (isRevealed) return;
 
@@ -26,11 +40,20 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer }) => {
 
     if (isCorrect) {
       setShowConfetti(true);
+    } else {
+      // Trigger the shake animation for incorrect answers
+      shake.value = withSequence(
+        withTiming(-10, { duration: 50 }),
+        withTiming(10, { duration: 50 }),
+        withTiming(-10, { duration: 50 }),
+        withTiming(10, { duration: 50 }),
+        withTiming(0, { duration: 50 }),
+      );
     }
   };
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, animatedStyle]}>
       <Text style={styles.questionText}>{question.question}</Text>
       
       <View>
@@ -55,16 +78,22 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer }) => {
           onAnimationEnd={() => setShowConfetti(false)}
         />
       )}
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: spacing.md,
     backgroundColor: colors.background,
     justifyContent: 'center',
+    width: '90%',
+    borderRadius: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   questionText: {
     ...typography.h1,
@@ -74,3 +103,4 @@ const styles = StyleSheet.create({
 });
 
 export default QuestionCard;
+
