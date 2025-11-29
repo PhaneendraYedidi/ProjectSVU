@@ -6,6 +6,7 @@ import { Question } from '../data/questions';
 import { fetchQuestions } from '../api/questionService';
 import QuestionCard from '../components/QuestionCard';
 import ExplanationView from '../components/ExplanationView';
+import SideActionPanel from '../components/SideActionPanel';
 import { colors } from '../styles/theme';
 
 const { height } = Dimensions.get('window');
@@ -70,10 +71,15 @@ const SwipeScreen: React.FC = () => {
           return (
             <GestureDetector gesture={doubleTapGesture}>
               <View style={styles.page}>
-                <QuestionCard
-                  question={item}
-                  onAnswer={isCorrect => handleAnswer(item.id, isCorrect)}
-                />
+                <View style={styles.contentContainer}>
+                  <View style={styles.cardContainer}>
+                    <QuestionCard
+                      question={item}
+                      onAnswer={isCorrect => handleAnswer(item.id, isCorrect)}
+                    />
+                  </View>
+                  <SideActionPanel />
+                </View>
                 {showExplanationId === item.id && (
                   <ExplanationView explanation={item.explanation} />
                 )}
@@ -98,9 +104,19 @@ const styles = StyleSheet.create({
   },
   page: {
     height,
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  cardContainer: {
+    flex: 1,
+    alignItems: 'center',
   },
   centered: {
     flex: 1,

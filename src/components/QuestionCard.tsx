@@ -87,7 +87,8 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     backgroundColor: colors.background,
     justifyContent: 'center',
-    width: '90%',
+    width: '85%', // Reduced width to make space
+    marginLeft: spacing.md, // Added margin for spacing
     borderRadius: spacing.md,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
