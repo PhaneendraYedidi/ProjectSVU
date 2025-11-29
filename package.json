@@ -21,7 +21,8 @@
     "react-native-vector-icons": "10.0.3",
     "react-native-confetti-cannon": "1.5.2",
     "zustand": "4.4.7",
-    "@react-native-async-storage/async-storage": "^1.22.0"
+    "@react-native-async-storage/async-storage": "^1.22.0",
+    "@react-navigation/bottom-tabs": "6.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
