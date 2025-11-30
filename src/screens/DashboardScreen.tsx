@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useQuestionStore } from '../store/questionStore';
+import { VictoryChart, VictoryBar, VictoryTheme, VictoryAxis } from 'victory-native';
 
 const DashboardScreen: React.FC = () => {
   const questionTimes = useQuestionStore(state => state.questionTimes);
@@ -20,6 +21,12 @@ const DashboardScreen: React.FC = () => {
   }
   const percentageCorrect = numQuestionsAnswered > 0 ? (numCorrectAnswers / numQuestionsAnswered) * 100 : 0;
 
+  // Prepare chart data
+  const chartData = questionIds.map(id => ({
+    questionId: id,
+    time: questionTimes[id],
+  }));
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Dashboard</Text>
@@ -27,6 +34,26 @@ const DashboardScreen: React.FC = () => {
       <Text>Total Questions Answered: {numQuestionsAnswered}</Text>
       <Text>Percentage Correct: {percentageCorrect.toFixed(2)}%</Text>
       <Text>Number of Bookmarked Questions: {bookmarkedQuestionIds.length}</Text>
+
+      <VictoryChart
+        theme={VictoryTheme?.material}
+        domainPadding={{ x: 20 }}
+      >
+        <VictoryAxis
+          label="Question ID"
+          style={{ axisLabel: { padding: 30 } }}
+        />
+        <VictoryAxis
+          dependentAxis
+          label="Time (s)"
+          style={{ axisLabel: { padding: 30 } }}
+        />
+        <VictoryBar
+          data={chartData}
+          x="questionId"
+          y="time"
+        />
+      </VictoryChart>
     </View>
   );
 };
