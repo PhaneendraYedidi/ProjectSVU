@@ -1,17 +1,22 @@
-// src/store/questionStore.ts
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface QuestionState {
   bookmarkedQuestionIds: string[];
+  questionTimes: Record<string, number>; // questionId: timeElapsed
+  questionCorrect: Record<string, boolean>;
   toggleBookmark: (questionId: string) => void;
+  recordTime: (questionId: string, time: number) => void;
+  recordAnswer: (questionId: string, correct: boolean) => void;
 }
 
 export const useQuestionStore = create<QuestionState>()(
   persist(
     (set, get) => ({
       bookmarkedQuestionIds: [],
+      questionTimes: {},
+      questionCorrect: {},
       toggleBookmark: (questionId: string) => {
         const currentBookmarkedIds = get().bookmarkedQuestionIds;
         const isBookmarked = currentBookmarkedIds.includes(questionId);
@@ -29,6 +34,16 @@ export const useQuestionStore = create<QuestionState>()(
             bookmarkedQuestionIds: [...currentBookmarkedIds, questionId],
           });
         }
+      },
+      recordTime: (questionId: string, time: number) => {
+        set({
+          questionTimes: { ...get().questionTimes, [questionId]: time },
+        });
+      },
+      recordAnswer: (questionId: string, correct: boolean) => {
+        set({
+          questionCorrect: { ...get().questionCorrect, [questionId]: correct },
+        });
       },
     }),
     {

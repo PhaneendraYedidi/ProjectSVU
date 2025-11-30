@@ -1,11 +1,32 @@
-// src/screens/DashboardScreen.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useQuestionStore } from '../store/questionStore';
 
 const DashboardScreen: React.FC = () => {
+  const questionTimes = useQuestionStore(state => state.questionTimes);
+  const bookmarkedQuestionIds = useQuestionStore(state => state.bookmarkedQuestionIds);
+  const questionCorrect = useQuestionStore(state => state.questionCorrect);
+
+  // Calculate average time
+  const questionIds = Object.keys(questionTimes);
+  const totalTime = questionIds.reduce((sum, id) => sum + questionTimes[id], 0);
+  const averageTime = questionIds.length > 0 ? totalTime / questionIds.length : 0;
+  const numQuestionsAnswered = questionIds.length;
+  let numCorrectAnswers = 0;
+  for (let id in questionCorrect) {
+    if (questionCorrect[id]) {
+      numCorrectAnswers++;
+    }
+  }
+  const percentageCorrect = numQuestionsAnswered > 0 ? (numCorrectAnswers / numQuestionsAnswered) * 100 : 0;
+
   return (
     <View style={styles.container}>
-      <Text>Dashboard Screen</Text>
+      <Text style={styles.header}>Dashboard</Text>
+      <Text>Average Time per Question: {averageTime.toFixed(2)}s</Text>
+      <Text>Total Questions Answered: {numQuestionsAnswered}</Text>
+      <Text>Percentage Correct: {percentageCorrect.toFixed(2)}%</Text>
+      <Text>Number of Bookmarked Questions: {bookmarkedQuestionIds.length}</Text>
     </View>
   );
 };
@@ -13,8 +34,12 @@ const DashboardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 16,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
 });
 
