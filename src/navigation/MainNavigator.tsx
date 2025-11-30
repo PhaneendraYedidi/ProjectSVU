@@ -1,15 +1,17 @@
 // src/navigation/MainNavigator.tsx
-import React from 'react';
+import React, {useContext} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DashboardScreen from '../screens/DashboardScreen';
 import PracticeScreen from '../screens/PracticeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import { colors } from '../styles/theme';
-
+import { ThemeContext } from '../context/ThemeContext';
+import { darkColors, lightColors } from '../styles/theme';
 const Tab = createBottomTabNavigator();
 
 const MainNavigator = () => {
+    const { isDarkMode } = useContext(ThemeContext);
+    const colors = isDarkMode ? darkColors : lightColors;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -28,7 +30,7 @@ const MainNavigator = () => {
           return <Icon name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.darkGray,
+        tabBarInactiveTintColor: colors.secondary,
         headerShown: false,
       })}
     >

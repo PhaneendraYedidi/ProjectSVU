@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Animated, {
   useSharedValue,
@@ -8,9 +8,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Question } from '../data/questions';
-import { colors, spacing, typography } from '../styles/theme';
+import { lightColors, spacing, typography, darkColors } from '../styles/theme';
 import Option from './Option';
 import { useQuestionStore } from '../store/questionStore';
+import { ThemeContext } from '../context/ThemeContext';
+const { width, height } = Dimensions.get('window');
 
 interface QuestionCardProps {
   question: Question;
@@ -27,6 +29,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer }) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const recordTime = useQuestionStore(state => state.recordTime);
   const recordAnswer = useQuestionStore(state => state.recordAnswer);
+  const { isDarkMode } = useContext(ThemeContext);
+  const colors = isDarkMode ? darkColors : lightColors;
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -75,9 +79,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer }) => {
   };
 
   return (
-    <Animated.View style={[styles.container, animatedStyle]}>
-      <Text style={styles.timerText}>Time: {timeElapsed}s</Text>
-      <Text style={styles.questionText}>{question.question}</Text>
+    <Animated.View style={[styles.container, animatedStyle, {backgroundColor: colors.surface, shadowColor: colors.textSecondary}]}>
+      <Text style={[styles.timerText, {color: colors.textSecondary}]}>Time: {timeElapsed}s</Text>
+      <Text style={[styles.questionText, {color: colors.textPrimary}]}>{question.question}</Text>
 
       <View>
         {question.options.map(option => (
@@ -108,20 +112,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer }) => {
 const styles = StyleSheet.create({
   container: {
     padding: spacing.md,
-    backgroundColor: colors.background,
     justifyContent: 'center',
-    width: '85%', // Reduced width to make space
+    width: width * 0.85, // Reduced width to make space
     marginLeft: spacing.md, // Added margin for spacing
     borderRadius: spacing.md,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   questionText: {
-    ...typography.h1,
-    color: colors.text,
+    fontSize: 28,
+    fontWeight: 'bold',
+    letterSpacing: -0.5,
     marginBottom: spacing.lg,
   },
   timerText: {

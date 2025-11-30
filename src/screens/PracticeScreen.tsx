@@ -1,5 +1,5 @@
 // src/screens/PracticeScreen.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { View, StyleSheet, FlatList, Dimensions, Text, ActivityIndicator } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Question } from '../data/questions';
@@ -7,8 +7,8 @@ import { fetchQuestions } from '../api/questionService';
 import QuestionCard from '../components/QuestionCard';
 import ExplanationView from '../components/ExplanationView';
 import SideActionPanel from '../components/SideActionPanel';
-import { colors } from '../styles/theme';
-
+import { lightColors, darkColors } from '../styles/theme';
+import { ThemeContext } from '../context/ThemeContext';
 const { height } = Dimensions.get('window');
 
 const PracticeScreen: React.FC = () => {
@@ -17,7 +17,8 @@ const PracticeScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [showExplanationId, setShowExplanationId] = useState<string | null>(null);
-
+  const { isDarkMode } = useContext(ThemeContext);
+  const colors = isDarkMode ? darkColors : lightColors;
   useEffect(() => {
     const loadQuestions = async () => {
       try {
@@ -58,7 +59,7 @@ const PracticeScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={questions}
         renderItem={({ item }) => {
@@ -99,13 +100,12 @@ const PracticeScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.background,
+    flex: 1
   },
   page: {
     height,
     width: '100%',
-    justifyContent: 'center',
+    justifyContent: 'flex-start', // changed to flex-start
     alignItems: 'center',
   },
   contentContainer: {

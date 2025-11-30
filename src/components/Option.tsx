@@ -1,7 +1,7 @@
-// src/components/Option.tsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../styles/theme';
+import { lightColors, spacing, typography, darkColors } from '../styles/theme';
+import { ThemeContext } from '../context/ThemeContext';
 
 interface OptionProps {
   text: string;
@@ -18,23 +18,25 @@ const Option: React.FC<OptionProps> = ({
   isRevealed,
   onPress,
 }) => {
+  const { isDarkMode } = useContext(ThemeContext);
+  const colors = isDarkMode ? darkColors : lightColors;
   const getBackgroundColor = () => {
     if (isRevealed) {
-      return isCorrect ? colors.correct : (isSelected ? colors.incorrect : colors.lightGray);
+      return isCorrect ? colors.success : (isSelected ? colors.error : colors.surface);
     }
-    return isSelected ? colors.primary : colors.lightGray;
+    return isSelected ? colors.primary : colors.surface;
   };
 
   const getTextColor = () => {
     if (isRevealed) {
-      return isCorrect || isSelected ? '#FFFFFF' : colors.text;
+      return isCorrect || isSelected ? colors.surface : colors.textPrimary;
     }
-    return isSelected ? '#FFFFFF' : colors.text;
+    return isSelected ? colors.surface : colors.textPrimary;
   };
 
   return (
     <TouchableOpacity
-      style={[styles.container, { backgroundColor: getBackgroundColor() }]}
+      style={[styles.container, { backgroundColor: getBackgroundColor(), borderColor: colors.border }]}
       onPress={onPress}
       disabled={isRevealed}
     >
@@ -49,10 +51,11 @@ const styles = StyleSheet.create({
     borderRadius: spacing.sm,
     marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.mediumGray,
   },
   text: {
     ...typography.body,
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });
 

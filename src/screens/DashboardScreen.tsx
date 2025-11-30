@@ -1,9 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useQuestionStore } from '../store/questionStore';
 import { VictoryChart, VictoryBar, VictoryTheme, VictoryAxis } from 'victory-native';
+import { ThemeContext } from '../context/ThemeContext';
+import { lightColors, darkColors, typography, spacing } from '../styles/theme';
 
 const DashboardScreen: React.FC = () => {
+  const { isDarkMode } = useContext(ThemeContext);
+  const colors = isDarkMode ? darkColors : lightColors;
   const questionTimes = useQuestionStore(state => state.questionTimes);
   const bookmarkedQuestionIds = useQuestionStore(state => state.bookmarkedQuestionIds);
   const questionCorrect = useQuestionStore(state => state.questionCorrect);
@@ -28,45 +32,58 @@ const DashboardScreen: React.FC = () => {
   }));
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Dashboard</Text>
-      <Text>Average Time per Question: {averageTime.toFixed(2)}s</Text>
-      <Text>Total Questions Answered: {numQuestionsAnswered}</Text>
-      <Text>Percentage Correct: {percentageCorrect.toFixed(2)}%</Text>
-      <Text>Number of Bookmarked Questions: {bookmarkedQuestionIds.length}</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.header, { color: colors.textPrimary }]}>Dashboard</Text>
+      <View style={styles.metricsContainer}>
+        <Text style={[styles.metricText, { color: colors.textSecondary }]}>Average Time: {averageTime.toFixed(2)}s</Text>
+        <Text style={[styles.metricText, { color: colors.textSecondary }]}>Answered: {numQuestionsAnswered}</Text>
+        <Text style={[styles.metricText, { color: colors.textSecondary }]}>Correct: {percentageCorrect.toFixed(2)}%</Text>
+        <Text style={[styles.metricText, { color: colors.textSecondary }]}>Bookmarked: {bookmarkedQuestionIds.length}</Text>
+      </View>
 
       <VictoryChart
-        theme={VictoryTheme?.material}
-        domainPadding={{ x: 20 }}
+        theme={VictoryTheme.material}
+        domainPadding={{ x: spacing.md }}
       >
         <VictoryAxis
           label="Question ID"
-          style={{ axisLabel: { padding: 30 } }}
+          style={{ axisLabel: { ...typography.body, padding: 30, color: colors.textSecondary } }}
         />
         <VictoryAxis
           dependentAxis
           label="Time (s)"
-          style={{ axisLabel: { padding: 30 } }}
+          style={{ axisLabel: { ...typography.body, padding: 30, color: colors.textSecondary } }}
         />
         <VictoryBar
           data={chartData}
           x="questionId"
           y="time"
+          style={{ data: { fill: colors.primary } }}
         />
       </VictoryChart>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    marginTop: spacing.xl,
+    padding: spacing.md,
   },
   header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    ...typography.h1,
+    marginBottom: spacing.lg,
+  },
+  metricsContainer: {
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: spacing.sm,
+  },
+  metricText: {
+    ...typography.body,
+    marginBottom: spacing.sm,
   },
 });
 

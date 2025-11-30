@@ -1,8 +1,8 @@
-// src/components/IconAction.tsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { colors, spacing, typography } from '../styles/theme';
+import { lightColors, spacing, typography, darkColors } from '../styles/theme';
+import { ThemeContext } from '../context/ThemeContext';
 
 interface IconActionProps {
   iconName: string;
@@ -12,7 +12,9 @@ interface IconActionProps {
 }
 
 const IconAction: React.FC<IconActionProps> = ({ iconName, label, onPress, isActive }) => {
-  const color = isActive ? colors.primary : colors.darkGray;
+  const { isDarkMode } = useContext(ThemeContext);
+  const colors = isDarkMode ? darkColors : lightColors;
+  const color = isActive ? colors.primary : colors.textSecondary;
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
@@ -25,7 +27,7 @@ const IconAction: React.FC<IconActionProps> = ({ iconName, label, onPress, isAct
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   label: {
     ...typography.body,
@@ -35,4 +37,3 @@ const styles = StyleSheet.create({
 });
 
 export default IconAction;
-

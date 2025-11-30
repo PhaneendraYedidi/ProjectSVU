@@ -38,8 +38,8 @@ const SideActionPanel: React.FC<SideActionPanelProps> = ({ questionId }) => {
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'flex-end',
-    paddingBottom: 100, // Adjust this value to align with the QuestionCard
-    paddingRight: spacing.sm,
+    paddingBottom: 70, // Adjust this value to align with the QuestionCard
+    paddingRight: 2,
   },
 });
 
