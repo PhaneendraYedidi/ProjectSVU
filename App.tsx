@@ -3,18 +3,16 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
-import AppNavigator from './src/navigation/AppNavigator';
-import { ThemeProvider } from './src/context/ThemeContext';
+import RootNavigator from './src/navigation/RootNavigator';
+import "./src/api/interceptors";
 
 function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
-        <NavigationContainer>
-          <ThemeProvider>
-            <AppNavigator />
-          </ThemeProvider>
-        </NavigationContainer>
+          {/* <ThemeProvider> */}
+              <RootNavigator />
+          {/* </ThemeProvider> */}
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

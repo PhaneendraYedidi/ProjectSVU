@@ -77,3 +77,112 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+
+src/
+ ├─ api/
+ │   ├─ client.ts          # axios instance
+ │   ├─ interceptors.ts    # subscription/auth handling
+ │   └─ endpoints.ts
+ ├─ auth/
+ │   ├─ auth.store.ts      # zustand auth state
+ │   ├─ auth.service.ts    # login / logout
+ │   └─ AuthGate.tsx
+ ├─ subscription/
+ │   ├─ subscription.store.ts
+ │   ├─ PaywallScreen.tsx
+ │   └─ useSubscription.ts
+ ├─ navigation/
+ │   ├─ AppNavigator.tsx
+ │   └─ RootNavigator.tsx
+ ├─ features/
+ │   ├─ quiz/
+ │   ├─ profile/
+ │   └─ dashboard/
+ └─ utils/
+------------------------------------------------
+ Phase 1 — Foundation
+
+1️⃣ Login Screen
+2️⃣ Signup Screen (with referral)
+3️⃣ Auth Store + Token Handling
+4️⃣ Navigation (Auth ↔ App)
+
+Phase 2 — Core App
+
+5️⃣ Home Screen
+6️⃣ Practice Questions Screen
+7️⃣ Mock Test Screen
+
+Phase 3 — Business
+
+8️⃣ Dashboard Analytics Screen
+9️⃣ Subscription / Payment Screen
+🔟 Referral Info Screen
+------------------------------------------------------
+✅ STEP 1 — API & AUTH CORE (FOUNDATION)
+
+(Do this first, otherwise everything breaks later)
+
+api/endpoints.ts
+
+api/client.ts
+
+api/interceptors.ts
+
+auth/auth.store.ts
+
+auth/auth.service.ts
+
+auth/AuthGate.tsx
+
+📌 Outcome:
+
+Login works
+
+Refresh works
+
+App survives token expiry
+
+✅ STEP 2 — AUTH SCREENS
+
+Login Screen
+
+Signup Screen (with referral)
+
+📌 Outcome:
+
+User can enter app
+
+✅ STEP 3 — HOME + PRACTICE
+
+Home Screen
+
+Practice Start
+
+Practice Question UI
+
+📌 Outcome:
+
+Core value delivered
+
+✅ STEP 4 — MOCK TEST ENGINE
+
+Mock Start
+
+Mock Question + Timer
+
+Submit Mock
+
+✅ STEP 5 — BUSINESS FEATURES
+
+Dashboard
+
+Subscription Paywall
+
+Razorpay integration
+
+Referral earnings UI
+
+---Pending Items
+1. Add signup page

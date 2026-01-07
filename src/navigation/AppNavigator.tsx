@@ -1,24 +1,19 @@
-// src/navigation/AppNavigator.tsx
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import MainNavigator from './MainNavigator';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import DashboardScreen from "../features/dashboard/DashboardScreen";
+import PracticeScreen from "../features/quiz/PracticeScreen";
+import ProfileScreen from "../features/profile/ProfileScreen";
+import MockResultScreen from "../features/mock/MockResultScreen";
 
-export type RootStackParamList = {
-  Main: undefined;
-};
+const Tab = createBottomTabNavigator();
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
-
-const AppNavigator: React.FC = () => {
+export default function AppNavigator() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Main"
-        component={MainNavigator}
-        options={{ headerShown: false }}
-      />
-    </Stack.Navigator>
+    <Tab.Navigator>
+      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Practice" component={PracticeScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="MockResult" component={MockResultScreen} />
+    </Tab.Navigator>
   );
-};
-
-export default AppNavigator;
+}

@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "axios": "1.12.2",
     "react": "18.2.0",
     "react-native": "0.73.11",
     "@react-navigation/native": "6.1.8",
@@ -24,7 +25,8 @@
     "@react-native-async-storage/async-storage": "^1.22.0",
     "@react-navigation/bottom-tabs": "6.3.1",
     "react-native-svg": "^15.0.0",
-    "victory-native": "36.9.2"
+    "victory-native": "36.9.2",
+    "react-native-keychain": "8.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
