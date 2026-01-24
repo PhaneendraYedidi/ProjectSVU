@@ -5,10 +5,9 @@ import { useAuthStore } from "./auth.store";
 import { useSubscriptionStore } from "../subscription/subscription.store";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }: any) {
   const setAuth = useAuthStore(state => state.setAuth);
   const setSubscription = useSubscriptionStore(state => state.setSubscription);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -52,6 +51,7 @@ export default function LoginScreen() {
       />
 
       <Button title={loading ? "Logging in..." : "Login"} onPress={onLogin} />
+      <Button title="Sign Up" onPress={() => navigation.navigate("Signup")} />
     </SafeAreaView>
   );
 }

@@ -1,6 +1,7 @@
 const API = {
     AUTH: {
         LOGIN: "/auth/login",
+        SIGNUP: "/auth/signup",
         REFRESH: "/auth/refresh",
         LOGOUT: "/auth/logout"
     },
