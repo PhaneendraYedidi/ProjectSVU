@@ -1,7 +1,9 @@
 import api from "../../api/client";
 
 export const fetchPracticeQuestions = async (payload: any) => {
-  const res = await api.post("/practice/questions", payload);
+  console.log(payload);
+  const res = await api.get("/practice/questions", payload);
+  console.log(res.data);
   return res.data;
 };
 

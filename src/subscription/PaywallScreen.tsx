@@ -14,7 +14,7 @@ const PaywallScreen = ({ navigation }: any) => {
 
       <Button
         title="Upgrade Now"
-        onPress={() => navigation.navigate("Subscription")}
+        onPress={() => navigation?.navigate("Subscription")}
       />
     </View>
   );

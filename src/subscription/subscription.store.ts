@@ -1,14 +1,16 @@
 import { create } from "zustand";
 import { useAuthStore } from "../auth/auth.store";
 
-// type SubscriptionState = {
-//   isPremium: boolean;
-//   isExpired: boolean;
-//   expiresAt: Date | null;
-//   refreshFromAuth: () => void;
-// };
+interface SubscriptionState {
+  plan: "free" | "premium";
+  expiresAt?: string | null;
 
-export const useSubscriptionStore = create<any>((set: any) => ({
+  setSubscription: (sub: any) => void;
+  isPremium: () => boolean;
+  isExpired: () => boolean;
+};
+
+export const useSubscriptionStore = create<SubscriptionState>((set: any) => ({
   // isPremium: false,
   // isExpired: true,
   // expiresAt: null,
@@ -43,11 +45,11 @@ export const useSubscriptionStore = create<any>((set: any) => ({
       expiresAt: sub.expiresAt,
     }),
 
-  isPremium: () => {
-    return useSubscriptionStore.getState().plan !== "FREE";
+  isPremium: (): boolean => {
+    return useSubscriptionStore.getState().plan === "premium";
   },
 
-  isExpired: () => {
+  isExpired: (): boolean => {
     const exp = useSubscriptionStore.getState().expiresAt;
     return exp ? new Date(exp) < new Date() : true;
   },

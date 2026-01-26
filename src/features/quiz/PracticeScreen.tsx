@@ -26,7 +26,7 @@ export default function PracticeScreen() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const limit = plan === "FREE" ? 5 : 20;
+  const limit = plan === "free" ? 5 : 20;
 
   // 🔹 Fetch questions
   const loadQuestions = async () => {
@@ -39,7 +39,8 @@ export default function PracticeScreen() {
 
       setQuestions(res.questions);
       setHasMore(res.hasMore);
-    } catch (e) {
+    } catch (e: any) {
+      console.log(e.response.data);
       Alert.alert("Error fetching questions");
     }
   };
@@ -56,7 +57,7 @@ export default function PracticeScreen() {
   }, [currentIndex, questions]);
 
   // 🔒 Free user limit enforcement
-  if (plan === "FREE" && currentIndex >= 5) {
+  if (plan === "free" && currentIndex >= 5) {
     return <PaywallScreen />;
   }
 
@@ -70,19 +71,19 @@ export default function PracticeScreen() {
   }
 
   const onAnswer = (option: string) => {
-    stopTimer(q.id);
-    selectAnswer(q.id, option);
+    stopTimer(q._id);
+    selectAnswer(q._id, option);
 
     if (currentIndex + 1 < questions.length) {
-      next();
-    } else if (hasMore && plan !== "FREE") {
+      //next();
+    } else if (hasMore && plan !== "free") {
       setPage((p) => p + 1);
     } else {
       Alert.alert("Practice Completed");
     }
   };
 
-  const selected = answers[q.id];
+  const selected = answers[q._id];
   const isCorrect = selected === q.correctAnswer;
 
   return (
@@ -98,7 +99,7 @@ export default function PracticeScreen() {
       {q.options.map((o: any) => (
         <Button
           key={o.key}
-          title={`${o.key}. ${o.value}`}
+          title={`${o.key}. ${o.text}`}
           disabled={!!selected}
           onPress={() => onAnswer(o.key)}
         />
@@ -110,12 +111,12 @@ export default function PracticeScreen() {
             explanation={q.explanation}
           />
 
-          <Button title="Bookmark" onPress={() => bookmarkQuestion(q.id)} />
+          <Button title="Bookmark" onPress={() => bookmarkQuestion(q._id)} />
 
           <Button
             title="Report"
             onPress={() =>
-              reportQuestion(q.id, "Incorrect explanation")
+              reportQuestion(q._id, "Incorrect explanation")
             }
           />
 
