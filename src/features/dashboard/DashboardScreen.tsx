@@ -1,57 +1,257 @@
-import React, { useEffect } from "react";
-import { View, Text, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import { VictoryPie, VictoryChart, VictoryTheme, VictoryBar, VictoryAxis } from "victory-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
+
 import { getDashboard } from "./dashboard.service";
 import { useDashboardStore } from "./dashboard.store";
+import CustomDrawer from "../../components/CustomDrawer";
+
+const { width } = Dimensions.get("window");
 
 export default function DashboardScreen() {
   const { data, load } = useDashboardStore();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     getDashboard().then(load);
   }, []);
 
-  if (!data) return <Text>Loading...</Text>;
+  if (!data) return (
+    <View style={styles.loadingContainer}>
+      <Text style={styles.loadingText}>Loading Analytics...</Text>
+    </View>
+  );
+
+  // Prepare data for charts
+  const pieData = [
+    { x: "Correct", y: data.correct },
+    { x: "Wrong", y: data.wrong },
+    // { x: "Skipped", y: data.totalAttempted - (data.correct + data.wrong) } // Optional if we track skipped
+  ];
+
+  const subjectData = data.subjectStats?.map((s: any) => ({
+    x: s._id || 'Unknown',
+    y: s.accuracy || 0
+  })) || [];
 
   return (
-    <ScrollView style={{ padding: 20 }}>
-      <Text style={{ fontSize: 22, fontWeight: "bold" }}>
-        Performance Overview
-      </Text>
+    <View style={styles.container}>
+      <CustomDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
 
-      {/* Stats */}
-      <View style={{ marginVertical: 15 }}>
-        <Text>Total Attempted: {data.totalAttempted}</Text>
-        <Text>Correct: {data.correct}</Text>
-        <Text>Wrong: {data.wrong}</Text>
-        <Text>Accuracy: {data.accuracy}%</Text>
-        <Text>Avg Time / Q: {data.avgTime}s</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setIsDrawerOpen(true)}>
+          <Icon name="menu-outline" size={30} color="#FFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Dashboard</Text>
+        <View style={{ width: 30 }} />
       </View>
 
-      {/* Difficulty */}
-      {/* <Text style={{ fontWeight: "bold" }}>By Difficulty</Text>
-      <Text>Easy: {data.byDifficulty.easy}%</Text>
-      <Text>Medium: {data.byDifficulty.medium}%</Text>
-      <Text>Hard: {data.byDifficulty.hard}%</Text> */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Summary Cards */}
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Icon name="checkmark-circle-outline" size={24} color="#4CAF50" />
+            <Text style={styles.statValue}>{data.accuracy}%</Text>
+            <Text style={styles.statLabel}>Accuracy</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Icon name="flash-outline" size={24} color="#FFC107" />
+            <Text style={styles.statValue}>{data.totalAttempted}</Text>
+            <Text style={styles.statLabel}>Attempted</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Icon name="time-outline" size={24} color="#2196F3" />
+            <Text style={styles.statValue}>{data.avgTime}s</Text>
+            <Text style={styles.statLabel}>Avg Time</Text>
+          </View>
+        </View>
 
-      {/* Subjects */}
-      {/* <Text style={{ fontWeight: "bold", marginTop: 15 }}>
-        Subject Accuracy
-      </Text>
-      {data.bySubject.map((s: any) => (
-        <Text key={s.subject}>
-          {s.subject}: {s.accuracy}%
-        </Text>
-      ))} */}
+        {/* Accuracy Chart */}
+        <View style={styles.chartContainer}>
+          <Text style={styles.sectionTitle}>Performance Breakdown</Text>
+          {data.totalAttempted > 0 ? (
+            <VictoryPie
+              data={pieData}
+              colorScale={["#4CAF50", "#F44336", "#9E9E9E"]}
+              innerRadius={70}
+              radius={100}
+              labels={({ datum }) => datum.y > 0 ? `${datum.x}: ${datum.y}` : ''}
+              style={{
+                labels: { fill: "white", fontSize: 12, fontWeight: "bold" }
+              }}
+              width={width - 40}
+              height={250}
+            />
+          ) : (
+            <Text style={styles.noDataText}>No data available yet. Start practicing!</Text>
+          )}
+        </View>
 
-      {/* Recent */}
-      {/* <Text style={{ fontWeight: "bold", marginTop: 15 }}>
-        Recent Performance
-      </Text>
-      {data.recent.map((r: any) => (
-        <Text key={r.date}>
-          {r.date}: {r.accuracy}%
-        </Text>
-      ))} */}
-    </ScrollView>
+        {/* Weak Areas Recommendation */}
+        <View style={styles.recommendationCard}>
+          <View style={styles.recHeader}>
+            <Icon name="bulb-outline" size={24} color="#FFC107" />
+            <Text style={styles.recTitle}>AI Recommendation</Text>
+          </View>
+          <Text style={styles.recText}>
+            {data.accuracy < 50
+              ? "Focus on improving your accuracy in weak topics. Try 'Subject Wise' practice mode."
+              : "Great job! Challenge yourself with a Mock Test to improve speed."}
+          </Text>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate('Practice')}
+          >
+            <Text style={styles.actionButtonText}>Start Practice</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Subject Performance */}
+        {subjectData.length > 0 && (
+          <View style={styles.chartContainer}>
+            <Text style={styles.sectionTitle}>Subject Accuracy</Text>
+            <VictoryChart theme={VictoryTheme.material} domainPadding={20} width={width - 20}>
+              <VictoryAxis
+                style={{
+                  tickLabels: { fill: "#FFF", fontSize: 10, angle: -20 },
+                  axis: { stroke: "#555" }
+                }}
+              />
+              <VictoryAxis
+                dependentAxis
+                style={{
+                  tickLabels: { fill: "#FFF", fontSize: 10 },
+                  axis: { stroke: "#555" }
+                }}
+              />
+              <VictoryBar
+                data={subjectData}
+                style={{ data: { fill: "#2196F3" } }}
+                barWidth={20}
+              />
+            </VictoryChart>
+          </View>
+        )}
+
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#121212",
+  },
+  loadingText: {
+    color: '#FFF',
+    marginTop: 10,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 15,
+    backgroundColor: "#1E1E1E",
+    elevation: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100,
+  },
+  statsGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#1E1E1E",
+    borderRadius: 12,
+    padding: 15,
+    alignItems: "center",
+    marginHorizontal: 5,
+    elevation: 2,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginVertical: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#AAA",
+  },
+  chartContainer: {
+    backgroundColor: "#1E1E1E",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginBottom: 10,
+    alignSelf: "flex-start",
+  },
+  noDataText: {
+    color: "#AAA",
+    marginVertical: 20,
+    fontStyle: "italic",
+  },
+  recommendationCard: {
+    backgroundColor: "#2C2C2C", // Slightly lighter for emphasis
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: "#FFC107",
+  },
+  recHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  recTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginLeft: 8,
+  },
+  recText: {
+    color: "#DDD",
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 15,
+  },
+  actionButton: {
+    backgroundColor: "#2196F3",
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  actionButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+});
