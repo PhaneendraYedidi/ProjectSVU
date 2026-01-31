@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions, ActivityIndicator } from "react-native";
 import { VictoryPie, VictoryChart, VictoryTheme, VictoryBar, VictoryAxis } from "victory-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
@@ -13,15 +13,51 @@ const { width } = Dimensions.get("window");
 export default function DashboardScreen() {
   const { data, load } = useDashboardStore();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigation = useNavigation<any>();
 
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const res = await getDashboard();
+      load(res);
+    } catch (err: any) {
+      console.error("Dashboard fetch error:", err);
+      setError(err.message || "Failed to load dashboard");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    getDashboard().then(load);
+    fetchData();
   }, []);
+
+  if (isLoading && !data) return (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color="#2196F3" />
+      <Text style={styles.loadingText}>Loading Analytics...</Text>
+    </View>
+  );
+
+  if (error && !data) return (
+    <View style={styles.loadingContainer}>
+      <Icon name="alert-circle-outline" size={50} color="#F44336" />
+      <Text style={{ ...styles.loadingText, color: "#F44336", marginBottom: 20 }}>{error}</Text>
+      <TouchableOpacity style={styles.actionButton} onPress={fetchData}>
+        <Text style={styles.actionButtonText}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   if (!data) return (
     <View style={styles.loadingContainer}>
-      <Text style={styles.loadingText}>Loading Analytics...</Text>
+      <Text style={styles.loadingText}>No Data Available</Text>
+      <TouchableOpacity style={[styles.actionButton, { marginTop: 20 }]} onPress={fetchData}>
+        <Text style={styles.actionButtonText}>Retry</Text>
+      </TouchableOpacity>
     </View>
   );
 

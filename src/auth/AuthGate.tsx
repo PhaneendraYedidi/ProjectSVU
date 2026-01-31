@@ -20,6 +20,5 @@ export default function AuthGate() {
     );
   }
 
-  return <AppNavigator />;
-  // return accessToken ? <AppNavigator /> : <AuthNavigator />;
+  return accessToken ? <AppNavigator /> : <AuthNavigator />;
 }

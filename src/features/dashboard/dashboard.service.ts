@@ -1,4 +1,4 @@
-import apiClient from "../../api/client";
+import { apiClient } from "../../api/client";
 import  API  from "../../api/endpoints";
 
 export const getDashboard = async () => {

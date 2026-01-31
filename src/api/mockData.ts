@@ -56,6 +56,13 @@ export const MOCK_DATA = {
         referralCount: 5,
         referralEarnings: 500
     },
+    "/user/me": {
+        id: "mock_user_123",
+        name: "Dev User",
+        email: "dev@example.com",
+        phone: "9876543210",
+        subscription: "premium"
+    },
     "/challenges/create": {
         message: "Challenge created",
         challengeId: "ch_123",
@@ -65,6 +72,22 @@ export const MOCK_DATA = {
         message: "Joined successfully",
         challengeId: "ch_123",
         questions: []
+    },
+    // Generic fallback for challenge details
+    "/challenges/": {
+        _id: "ch_123",
+        code: "MOCK12",
+        status: "ACTIVE",
+        creator: { name: "Dev User" },
+        joiner: { name: "Opponent" },
+        questions: [
+            {
+                _id: "q1",
+                question: "Mock Challenge Q1",
+                options: [{ key: "A", text: "Opt A" }, { key: "B", text: "Opt B" }]
+            }
+        ],
+        scores: { creator: 0, joiner: 0 }
     },
     "/dashboard/summary": {
         totalQuestions: 150,
