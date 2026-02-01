@@ -4,14 +4,13 @@ import DashboardScreen from "../features/dashboard/DashboardScreen";
 import PracticeScreen from "../features/quiz/PracticeScreen";
 import ProfileScreen from "../features/profile/ProfileScreen";
 import MockResultScreen from "../features/mock/MockResultScreen";
-
-const Tab = createBottomTabNavigator();
-
 import QuestionFeedScreen from "../screens/QuestionFeedScreen";
-
 import ChallengesScreen from "../features/quiz/ChallengesScreen";
 import ChallengeLobbyScreen from "../features/quiz/ChallengeLobbyScreen";
 import MockTestScreen from "../features/mock/MockTestScreen";
+import BookmarksScreen from "../screens/BookmarksScreen";
+
+const Tab = createBottomTabNavigator();
 
 export default function AppNavigator() {
   return (
@@ -25,7 +24,7 @@ export default function AppNavigator() {
       <Tab.Screen name="ChallengeLobby" component={ChallengeLobbyScreen} />
       <Tab.Screen name="MockTest" component={MockTestScreen} />
       <Tab.Screen name="MockResult" component={MockResultScreen} />
-      <Tab.Screen name="Bookmarks" component={PracticeScreen} />
+      <Tab.Screen name="Bookmarks" component={BookmarksScreen} />
       <Tab.Screen name="Referral" component={ProfileScreen} />
       <Tab.Screen name="About" component={ProfileScreen} />
     </Tab.Navigator>

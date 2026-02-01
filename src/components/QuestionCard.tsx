@@ -13,9 +13,11 @@ import Animated, {
     withSequence,
     withTiming,
     withRepeat,
+    runOnJS
 } from 'react-native-reanimated';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { Question } from '../data/questions';
 import OptionItem from './OptionItem';
@@ -27,9 +29,10 @@ interface QuestionCardProps {
     question: any;
     isActive: boolean; // To pause timer if scrolled away?
     onAnswer: (optionIndex: number, isCorrect: boolean) => void;
+    onBookmark?: () => void;
 }
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, isActive, onAnswer }) => {
+const QuestionCard: React.FC<QuestionCardProps> = ({ question, isActive, onAnswer, onBookmark }) => {
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
@@ -64,10 +67,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, isActive, onAnswe
         setIsAnswered(true);
 
         if (intervalRef.current) clearInterval(intervalRef.current);
-
-        const isCorr = index === question.correctOptionIndex; // Ensure backend data or logic aligns here
-        // If question comes from backend, it might have `correctAnswer` (string) instead of index. 
-        // We'll need to adapt this in parent or here. Assuming simplified logic for now:
 
         if (index === question.correctOptionIndex) {
             setIsCorrect(true);
@@ -109,73 +108,91 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, isActive, onAnswe
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
+    const handleSwipeBookmark = () => {
+        console.log("Swipe Right: Bookmark triggered");
+        if (onBookmark) onBookmark();
+    };
+
+    const swipeGesture = Gesture.Pan()
+        .activeOffsetX(20)
+        .failOffsetY(20)
+        .onEnd((e) => {
+            if (e.translationX > 50) {
+                runOnJS(handleSwipeBookmark)();
+            }
+        });
+
     return (
-        <TouchableWithoutFeedback onPress={handleDoubleTap}>
-            <Animated.View style={[styles.container, animatedStyle]}>
-                {/* Background / Main Content */}
-                <View style={styles.contentContainer}>
-                    {/* Top Bar: Timer */}
-                    <View style={styles.topBar}>
-                        <View style={styles.timerBadge}>
-                            <Icon name="time-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />
-                            <Text style={styles.timerText}>{formatTime(timer)}</Text>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <GestureDetector gesture={swipeGesture}>
+                <TouchableWithoutFeedback onPress={handleDoubleTap}>
+                    <Animated.View style={[styles.container, animatedStyle]}>
+                        {/* Background / Main Content */}
+                        <View style={styles.contentContainer}>
+                            {/* Top Bar: Timer */}
+                            <View style={styles.topBar}>
+                                <View style={styles.timerBadge}>
+                                    <Icon name="time-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                                    <Text style={styles.timerText}>{formatTime(timer)}</Text>
+                                </View>
+                            </View>
+
+                            {/* Question */}
+                            <ScrollView contentContainerStyle={styles.scrollContent}>
+                                <Text style={styles.questionText}>{question.text}</Text>
+
+                                <View style={styles.optionsContainer}>
+                                    {question.options.map((option: string, index: number) => (
+                                        <OptionItem
+                                            key={index}
+                                            text={option}
+                                            isSelected={selectedOption === index}
+                                            isCorrect={isAnswered && index === question.correctOptionIndex}
+                                            isWrong={isAnswered && selectedOption === index && index !== question.correctOptionIndex}
+                                            onPress={() => handleOptionSelect(index)}
+                                            disabled={isAnswered}
+                                        />
+                                    ))}
+                                </View>
+                            </ScrollView>
                         </View>
-                    </View>
 
-                    {/* Question */}
-                    <ScrollView contentContainerStyle={styles.scrollContent}>
-                        <Text style={styles.questionText}>{question.text}</Text>
+                        {/* Side Action Bar */}
+                        <SideActionBar
+                            onLike={() => console.log('Like')}
+                            onDislike={() => console.log('Dislike')}
+                            onBookmark={onBookmark ? onBookmark : () => console.log('Bookmark')}
+                            onComment={() => console.log('Comment')}
+                            onShare={() => console.log('Share')}
+                        />
 
-                        <View style={styles.optionsContainer}>
-                            {question.options.map((option: string, index: number) => (
-                                <OptionItem
-                                    key={index}
-                                    text={option}
-                                    isSelected={selectedOption === index}
-                                    isCorrect={isAnswered && index === question.correctOptionIndex}
-                                    isWrong={isAnswered && selectedOption === index && index !== question.correctOptionIndex}
-                                    onPress={() => handleOptionSelect(index)}
-                                    disabled={isAnswered}
-                                />
-                            ))}
+                        {/* Chat / AI Option (Bottom) */}
+                        <View style={styles.bottomChatBar}>
+                            <Icon name="chatbubbles" size={24} color="#FFF" />
+                            <Text style={styles.chatText}>Ask AI...</Text>
                         </View>
-                    </ScrollView>
-                </View>
 
-                {/* Side Action Bar */}
-                <SideActionBar
-                    onLike={() => console.log('Like')}
-                    onDislike={() => console.log('Dislike')}
-                    onBookmark={() => console.log('Bookmark')}
-                    onComment={() => console.log('Comment')}
-                    onShare={() => console.log('Share')}
-                />
+                        {/* Explanation Overlay */}
+                        {showExplanation && (
+                            <View style={styles.explanationOverlay}>
+                                <Text style={styles.explanationTitle}>Explanation</Text>
+                                <Text style={styles.explanationText}>{question.explanation}</Text>
+                                <Text style={styles.explanationHint}>(Double tap to close)</Text>
+                            </View>
+                        )}
 
-                {/* Chat / AI Option (Bottom) */}
-                <View style={styles.bottomChatBar}>
-                    <Icon name="chatbubbles" size={24} color="#FFF" />
-                    <Text style={styles.chatText}>Ask AI...</Text>
-                </View>
-
-                {/* Explanation Overlay */}
-                {showExplanation && (
-                    <View style={styles.explanationOverlay}>
-                        <Text style={styles.explanationTitle}>Explanation</Text>
-                        <Text style={styles.explanationText}>{question.explanation}</Text>
-                        <Text style={styles.explanationHint}>(Double tap to close)</Text>
-                    </View>
-                )}
-
-                {/* Confetti */}
-                <ConfettiCannon
-                    count={200}
-                    origin={{ x: width / 2, y: -20 }}
-                    autoStart={false}
-                    ref={confettiRef}
-                    fadeOut={true}
-                />
-            </Animated.View>
-        </TouchableWithoutFeedback>
+                        {/* Confetti */}
+                        <ConfettiCannon
+                            count={200}
+                            origin={{ x: width / 2, y: -20 }}
+                            autoStart={false}
+                            ref={confettiRef}
+                            fadeOut={true}
+                        />
+                    </Animated.View>
+                </TouchableWithoutFeedback>
+            </GestureDetector>
+        </GestureHandlerRootView>
     );
 };
 
@@ -188,8 +205,9 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
-        paddingTop: 60, // Space for top timer
-        paddingHorizontal: 20,
+        paddingTop: 60,
+        paddingLeft: 20,
+        paddingRight: 20, // Standard padding as panel is collapsible
         paddingBottom: 100,
     },
     topBar: {
