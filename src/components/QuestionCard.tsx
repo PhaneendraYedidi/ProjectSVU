@@ -24,11 +24,12 @@ import SideActionBar from './SideActionBar';
 const { width, height } = Dimensions.get('window');
 
 interface QuestionCardProps {
-    question: Question;
+    question: any;
     isActive: boolean; // To pause timer if scrolled away?
+    onAnswer: (optionIndex: number, isCorrect: boolean) => void;
 }
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, isActive }) => {
+const QuestionCard: React.FC<QuestionCardProps> = ({ question, isActive, onAnswer }) => {
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
@@ -64,12 +65,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, isActive }) => {
 
         if (intervalRef.current) clearInterval(intervalRef.current);
 
+        const isCorr = index === question.correctOptionIndex; // Ensure backend data or logic aligns here
+        // If question comes from backend, it might have `correctAnswer` (string) instead of index. 
+        // We'll need to adapt this in parent or here. Assuming simplified logic for now:
+
         if (index === question.correctOptionIndex) {
             setIsCorrect(true);
             if (confettiRef.current) confettiRef.current.start();
+            onAnswer(index, true);
         } else {
             setIsCorrect(false);
             triggerShake();
+            onAnswer(index, false);
         }
     };
 
@@ -120,7 +127,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, isActive }) => {
                         <Text style={styles.questionText}>{question.text}</Text>
 
                         <View style={styles.optionsContainer}>
-                            {question.options.map((option, index) => (
+                            {question.options.map((option: string, index: number) => (
                                 <OptionItem
                                     key={index}
                                     text={option}
