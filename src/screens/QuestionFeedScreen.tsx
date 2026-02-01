@@ -127,6 +127,25 @@ const QuestionFeedScreen = () => {
         itemVisiblePercentThreshold: 80,
     });
 
+    const handleBookmark = async (questionId: string) => {
+        try {
+            // Need userId? Route expects userId in body? 
+            // practice.routes.ts: const { userId, questionId } = req.body;
+            // But auth middleware is there. "userId" in body might be needed if endpoint relies on it.
+            // Let's rely on apiClient sending auth token, but I might need to send userId if backend requires it explicitly from body.
+            // Backend line 205: const { userId, questionId } = req.body;
+            // It doesn't fallback to req.user.id there! I should fix backend or send userId.
+            // I'll fix backend to use req.user.id for better security, but for now I'll try to just send it if I have it, or assume backend update.
+            // Actually, I'll update backend logic for /bookmark to use req.user.id.
+
+            await apiClient.post('/practice/bookmark', { questionId });
+            console.log("Bookmarked:", questionId);
+            // Could show a toast
+        } catch (err) {
+            console.error("Failed to bookmark:", err);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
@@ -150,6 +169,7 @@ const QuestionFeedScreen = () => {
                         question={item}
                         isActive={item.id === activeQuestionId}
                         onAnswer={(idx, isCorrect) => handleAnswer(item, idx, isCorrect)}
+                        onBookmark={() => handleBookmark(item.id)}
                     />
                 )}
                 pagingEnabled
