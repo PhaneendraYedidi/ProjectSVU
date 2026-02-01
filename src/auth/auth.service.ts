@@ -12,6 +12,7 @@ export const signup = async (payload: {
   email: string;
   phone: string;
   password: string;
+  referralCode?: string;
 }) => {
   const { data } = await apiClient.post(API.AUTH.SIGNUP, payload);
   return data;

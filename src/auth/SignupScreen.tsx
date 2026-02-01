@@ -16,7 +16,8 @@ export default function SignupScreen({ navigation }: any) {
     name: "",
     email: "",
     phone: "",
-    password: ""
+    password: "",
+    referralCode: ""
   });
 
   const handleSignup = async () => {
@@ -62,6 +63,14 @@ export default function SignupScreen({ navigation }: any) {
         secureTextEntry
         value={form.password}
         onChangeText={(v) => setForm({ ...form, password: v })}
+      />
+
+      <TextInput
+        placeholder="Referral Code (Optional)"
+        style={styles.input}
+        value={form.referralCode}
+        onChangeText={(v) => setForm({ ...form, referralCode: v })}
+        autoCapitalize="characters"
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSignup}>

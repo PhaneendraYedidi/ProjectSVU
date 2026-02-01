@@ -9,6 +9,8 @@ import ChallengesScreen from "../features/quiz/ChallengesScreen";
 import ChallengeLobbyScreen from "../features/quiz/ChallengeLobbyScreen";
 import MockTestScreen from "../features/mock/MockTestScreen";
 import BookmarksScreen from "../screens/BookmarksScreen";
+import ReferralScreen from "../screens/ReferralScreen";
+import AboutScreen from "../screens/AboutScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -25,8 +27,8 @@ export default function AppNavigator() {
       <Tab.Screen name="MockTest" component={MockTestScreen} />
       <Tab.Screen name="MockResult" component={MockResultScreen} />
       <Tab.Screen name="Bookmarks" component={BookmarksScreen} />
-      <Tab.Screen name="Referral" component={ProfileScreen} />
-      <Tab.Screen name="About" component={ProfileScreen} />
+      <Tab.Screen name="Referral" component={ReferralScreen} />
+      <Tab.Screen name="About" component={AboutScreen} />
     </Tab.Navigator>
   );
 }
