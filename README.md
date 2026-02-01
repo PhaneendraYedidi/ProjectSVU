@@ -176,7 +176,7 @@ Submit Mock
 
 ✅ STEP 5 — BUSINESS FEATURES
 
-Dashboard
+Dashboard (Victory Native Charts)
 
 Subscription Paywall
 
@@ -184,5 +184,23 @@ Razorpay integration
 
 Referral earnings UI
 
----Pending Items
-1. Add signup page
+✅ STEP 6 — GAMIFICATION & SOCIAL (NEW)
+
+Challenges Mode (1v1 Async Battles)
+
+Challenge Lobby & Code Sharing
+
+Exam Mode (Question Grid, Timer, Delayed Feedback)
+
+Editable Profile (Backend Integrated)
+
+------------------------------------------------
+## 📱 Key Architecture Updates
+- **Navigation**: Moved to a `CustomDrawer` architecture accessible from the feed.
+- **Charts**: Used `victory-native` for high-performance dashboard analytics.
+- **API**: Centralized in `src/api` with Android Emulator support (`10.0.2.2`).
+
+## ⏭ Next Steps / Improvements
+1. **Socket.io Integration**: Replace polling in `ChallengeLobbyScreen` with real-time sockets.
+2. **Animation Polish**: Add more micro-interactions to the Quiz Feed.
+3. **Offline Mode**: Cache questions using `AsyncStorage`.

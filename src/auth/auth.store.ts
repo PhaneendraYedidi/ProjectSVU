@@ -17,6 +17,7 @@ type AuthState = {
   refreshToken: string | null;
   subscription: SubscriptionInfo | null;
   isHydrated: boolean;
+  hydrate: () => Promise<void>;
 
   setAuth: (data: {
     user: User;
@@ -53,21 +54,32 @@ export const useAuthStore = create<AuthState>(set => ({
   },
 
   hydrate: async () => {
-    const [[, accessToken], [, refreshToken], [, user], [, subscription]] =
-      await AsyncStorage.multiGet([
-        "accessToken",
-        "refreshToken",
-        "user",
-        "subscription"
-      ]);
+    try {
+      const [[, accessToken], [, refreshToken], [, user], [, subscription]] =
+        await AsyncStorage.multiGet([
+          "accessToken",
+          "refreshToken",
+          "user",
+          "subscription"
+        ]);
 
-    set({
-      accessToken,
-      refreshToken,
-      user: user ? JSON.parse(user) : null,
-      isHydrated: true,
-      subscription: subscription ? JSON.parse(subscription) : null,
-    });
+      set({
+        accessToken,
+        refreshToken,
+        user: user ? JSON.parse(user) : null,
+        isHydrated: true,
+        subscription: subscription ? JSON.parse(subscription) : null,
+      });
+    } catch (e) {
+      console.error("Hydration failed:", e);
+      set({
+        accessToken: null,
+        refreshToken: null,
+        user: null,
+        isHydrated: true,
+        subscription: null,
+      });
+    }
   },
 
   // setAccessToken: token =>
