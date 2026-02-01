@@ -99,7 +99,7 @@ apiClient.interceptors.request.use((config) => {
 
   if (
     config.url?.includes("/mock") &&
-    (!isPremium || isExpired)
+    (!isPremium() || isExpired())
   ) {
     return Promise.reject({
       message: "Subscription required",

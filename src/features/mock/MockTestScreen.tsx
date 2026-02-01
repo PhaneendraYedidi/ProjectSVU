@@ -1,40 +1,67 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 
-
-import { MOCK_QUESTIONS } from '../../data/questions'; // Using local mock data for prototype
+import { apiClient } from '../../api/client';
 import CustomDrawer from '../../components/CustomDrawer';
 
 const DURATION_SECONDS = 20 * 60; // 20 minutes
 
+interface MockQuestion {
+  _id: string;
+  question: string;
+  options: { key: string; text: string }[];
+}
+
 const MockTestScreen = () => {
   const navigation = useNavigation<any>();
   const [timeLeft, setTimeLeft] = useState(DURATION_SECONDS);
-  const [answers, setAnswers] = useState<{ [key: string]: number }>({});
+  const [questions, setQuestions] = useState<MockQuestion[]>([]);
+  const [mockTestId, setMockTestId] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<{ [key: string]: string }>({}); // key is questionId, value is option key
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
-  const [isExampleSubmitted, setIsExampleSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMatrixOpen, setIsMatrixOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    fetchMockTest();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const fetchMockTest = async () => {
+    try {
+      setIsLoading(true);
+      const res = await apiClient.post('/mock/start', {});
+      setQuestions(res.data.questions);
+      setMockTestId(res.data.mockTestId);
+      startTimer();
+    } catch (error: any) {
+      console.error("Failed to start mock test:", error);
+      Alert.alert("Error", "Failed to load mock test. Please try again.");
+      navigation.goBack();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const startTimer = () => {
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          handleSubmit();
+          handleSubmit(true); // Auto submit
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -42,25 +69,71 @@ const MockTestScreen = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const handleSelectOption = (qId: string, optionIndex: number) => {
-    setAnswers(prev => ({ ...prev, [qId]: optionIndex }));
+  const handleSelectOption = (qId: string, optionKey: string) => {
+    setAnswers(prev => ({ ...prev, [qId]: optionKey }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async (auto = false) => {
+    if (isSubmitting) return;
+
     if (timerRef.current) clearInterval(timerRef.current);
-    setIsExampleSubmitted(true);
-    Alert.alert("Test Submitted", "See your results in the history tab.");
-    navigation.navigate('Dashboard');
-  };
 
-  const activeQuestion = MOCK_QUESTIONS[activeQuestionIndex];
+    if (!auto) {
+      // Confirmation if manually submitting
+      const unanswered = questions.length - Object.keys(answers).length;
+      if (unanswered > 0) {
+        // Optional: ask for confirmation
+      }
+    }
+
+    try {
+      setIsSubmitting(true);
+      const res = await apiClient.post(`/mock/${mockTestId}/submit`, {
+        answers
+      });
+
+      const { score, total, percentage } = res.data;
+
+      Alert.alert(
+        "Test Submitted",
+        `You scored ${score}/${total} (${percentage}%)`,
+        [
+          { text: "Go to Dashboard", onPress: () => navigation.navigate('Dashboard') }
+        ]
+      );
+    } catch (error) {
+      console.error("Submission error:", error);
+      Alert.alert("Error", "Failed to submit test. Please try again.");
+      setIsSubmitting(false);
+      // Resume timer if error? Probably better to just let them try submitting again.
+    }
+  };
 
   const getStatusColor = (index: number) => {
-    const q = MOCK_QUESTIONS[index];
+    const q = questions[index];
     if (index === activeQuestionIndex) return '#2196F3'; // Current
-    if (answers[q.id] !== undefined) return '#4CAF50'; // Answered
+    if (answers[q._id]) return '#4CAF50'; // Answered
     return 'transparent'; // Unattempted
   };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#2196F3" />
+        <Text style={styles.loadingText}>Preparing your test...</Text>
+      </View>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text style={styles.loadingText}>No questions available.</Text>
+      </View>
+    );
+  }
+
+  const activeQuestion = questions[activeQuestionIndex];
 
   return (
     <View style={styles.container}>
@@ -79,8 +152,16 @@ const MockTestScreen = () => {
           </Text>
         </View>
 
-        <TouchableOpacity onPress={() => handleSubmit()} style={styles.submitBtn}>
-          <Text style={styles.submitText}>Submit</Text>
+        <TouchableOpacity
+          onPress={() => handleSubmit()}
+          style={[styles.submitBtn, isSubmitting && { opacity: 0.7 }]}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator size="small" color="#000" />
+          ) : (
+            <Text style={styles.submitText}>Submit</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -97,9 +178,9 @@ const MockTestScreen = () => {
         <View style={styles.matrixContainer}>
           <Text style={styles.matrixTitle}>Question Map</Text>
           <View style={styles.grid}>
-            {MOCK_QUESTIONS.map((q, idx) => (
+            {questions.map((q, idx) => (
               <TouchableOpacity
-                key={q.id}
+                key={q._id}
                 style={[
                   styles.gridItem,
                   { backgroundColor: getStatusColor(idx), borderColor: '#555', borderWidth: 1 }
@@ -119,25 +200,25 @@ const MockTestScreen = () => {
       {/* Question Content */}
       <View style={styles.content}>
         <View style={styles.questionHeader}>
-          <Text style={styles.qIndex}>Question {activeQuestionIndex + 1} of {MOCK_QUESTIONS.length}</Text>
-          <Text style={styles.qText}>{activeQuestion.text}</Text>
+          <Text style={styles.qIndex}>Question {activeQuestionIndex + 1} of {questions.length}</Text>
+          <Text style={styles.qText}>{activeQuestion.question}</Text>
         </View>
 
         {activeQuestion.options.map((option, idx) => {
-          const isSelected = answers[activeQuestion.id] === idx;
+          const isSelected = answers[activeQuestion._id] === option.key;
           return (
             <TouchableOpacity
-              key={idx}
+              key={option.key}
               style={[
                 styles.optionItem,
                 isSelected && styles.optionSelected
               ]}
-              onPress={() => handleSelectOption(activeQuestion.id, idx)}
+              onPress={() => handleSelectOption(activeQuestion._id, option.key)}
             >
               <View style={[styles.radioCircle, isSelected && { borderColor: '#2196F3' }]}>
                 {isSelected && <View style={styles.selectedRb} />}
               </View>
-              <Text style={[styles.optionText, isSelected && { color: '#FFF' }]}>{option}</Text>
+              <Text style={[styles.optionText, isSelected && { color: '#FFF' }]}>{option.text}</Text>
             </TouchableOpacity>
           );
         })}
@@ -155,9 +236,9 @@ const MockTestScreen = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          disabled={activeQuestionIndex === MOCK_QUESTIONS.length - 1}
+          disabled={activeQuestionIndex === questions.length - 1}
           onPress={() => setActiveQuestionIndex(i => i + 1)}
-          style={[styles.navBtn, activeQuestionIndex === MOCK_QUESTIONS.length - 1 && { opacity: 0.3 }]}
+          style={[styles.navBtn, activeQuestionIndex === questions.length - 1 && { opacity: 0.3 }]}
         >
           <Text style={styles.navText}>Next</Text>
           <Icon name="chevron-forward" size={24} color="#FFF" />
@@ -171,6 +252,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#121212',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  loadingText: {
+    color: '#FFF',
+    marginTop: 10,
+    fontSize: 16
   },
   topBar: {
     flexDirection: 'row',
@@ -201,6 +291,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 6,
     borderRadius: 6,
+    minWidth: 70,
+    alignItems: 'center'
   },
   submitText: {
     color: '#000',

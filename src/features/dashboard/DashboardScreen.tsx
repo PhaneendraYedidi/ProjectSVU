@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions, ActivityIndicator } from "react-native";
 import { VictoryPie, VictoryChart, VictoryTheme, VictoryBar, VictoryAxis } from "victory-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 import { getDashboard } from "./dashboard.service";
 import { useDashboardStore } from "./dashboard.store";
@@ -19,21 +19,25 @@ export default function DashboardScreen() {
 
   const fetchData = async () => {
     try {
-      setIsLoading(true);
+      // Only show loading if we don't have data yet, to avoid flicker on re-focus
+      if (!data) setIsLoading(true);
       setError(null);
       const res = await getDashboard();
       load(res);
     } catch (err: any) {
       console.error("Dashboard fetch error:", err);
-      setError(err.message || "Failed to load dashboard");
+      // Only show error state if we have no data
+      if (!data) setError(err.message || "Failed to load dashboard");
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   if (isLoading && !data) return (
     <View style={styles.loadingContainer}>
@@ -63,9 +67,9 @@ export default function DashboardScreen() {
 
   // Prepare data for charts
   const pieData = [
-    { x: "Correct", y: data.correct },
-    { x: "Wrong", y: data.wrong },
-    // { x: "Skipped", y: data.totalAttempted - (data.correct + data.wrong) } // Optional if we track skipped
+    { x: "Correct", y: data.correct || 0 },
+    { x: "Wrong", y: data.wrong || 0 },
+    // { x: "Skipped", y: (data.totalAttempted || 0) - ((data.correct || 0) + (data.wrong || 0)) } // Optional if we track skipped
   ];
 
   const subjectData = data.subjectStats?.map((s: any) => ({
@@ -91,18 +95,26 @@ export default function DashboardScreen() {
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Icon name="checkmark-circle-outline" size={24} color="#4CAF50" />
-            <Text style={styles.statValue}>{data.accuracy}%</Text>
+            <Text style={styles.statValue}>{data.accuracy || 0}%</Text>
             <Text style={styles.statLabel}>Accuracy</Text>
           </View>
           <View style={styles.statCard}>
             <Icon name="flash-outline" size={24} color="#FFC107" />
-            <Text style={styles.statValue}>{data.totalAttempted}</Text>
+            <Text style={styles.statValue}>{data.totalAttempted || 0}</Text>
             <Text style={styles.statLabel}>Attempted</Text>
           </View>
+        </View>
+
+        <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Icon name="time-outline" size={24} color="#2196F3" />
-            <Text style={styles.statValue}>{data.avgTime}s</Text>
-            <Text style={styles.statLabel}>Avg Time</Text>
+            <Icon name="school-outline" size={24} color="#9C27B0" />
+            <Text style={styles.statValue}>{data.totalMocks || 0}</Text>
+            <Text style={styles.statLabel}>Mock Tests</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Icon name="trending-up-outline" size={24} color="#FF9800" />
+            <Text style={styles.statValue}>{data.avgMockScore || 0}%</Text>
+            <Text style={styles.statLabel}>Avg Mock Score</Text>
           </View>
         </View>
 
@@ -134,7 +146,7 @@ export default function DashboardScreen() {
             <Text style={styles.recTitle}>AI Recommendation</Text>
           </View>
           <Text style={styles.recText}>
-            {data.accuracy < 50
+            {(data.accuracy || 0) < 50
               ? "Focus on improving your accuracy in weak topics. Try 'Subject Wise' practice mode."
               : "Great job! Challenge yourself with a Mock Test to improve speed."}
           </Text>
