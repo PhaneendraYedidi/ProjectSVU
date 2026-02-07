@@ -2,7 +2,8 @@ import axios from "axios";
 import { Platform } from "react-native";
 
 export const apiClient = axios.create({
-  baseURL: Platform.OS === "android" ? "http://10.0.2.2:5001/api" : "http://localhost:5001/api",
+  // baseURL: Platform.OS === "android" ? "http://10.0.2.2:5001/api" : "http://localhost:5001/api",
+  baseURL: "https://projectsvu-backend.onrender.com/api",
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
