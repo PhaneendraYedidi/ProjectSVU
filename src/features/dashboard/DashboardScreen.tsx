@@ -139,6 +139,18 @@ export default function DashboardScreen() {
           )}
         </View>
 
+        {/* Take a Mock Test Card */}
+        <TouchableOpacity
+          style={styles.mockTestCard}
+          onPress={() => navigation.navigate('MockTestList')}
+        >
+          <View style={styles.mockTestInfo}>
+            <Text style={styles.mockTestTitle}>Take a Mock Test</Text>
+            <Text style={styles.mockTestSubtitle}>Test your knowledge with curated exams</Text>
+          </View>
+          <Icon name="chevron-forward" size={24} color="#FFF" />
+        </TouchableOpacity>
+
         {/* Weak Areas Recommendation */}
         <View style={styles.recommendationCard}>
           <View style={styles.recHeader}>
@@ -301,5 +313,28 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: "#FFF",
     fontWeight: "bold",
+  },
+  mockTestCard: {
+    backgroundColor: "#4F46E5",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    elevation: 3,
+  },
+  mockTestInfo: {
+    flex: 1,
+  },
+  mockTestTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginBottom: 4,
+  },
+  mockTestSubtitle: {
+    fontSize: 14,
+    color: "#E0E7FF",
   },
 });

@@ -5,8 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 
 import { apiClient } from '../../api/client';
 import CustomDrawer from '../../components/CustomDrawer';
+import { useMockStore } from './mock.store';
 
-const DURATION_SECONDS = 20 * 60; // 20 minutes
+const DEFAULT_DURATION_SECONDS = 20 * 60; // 20 minutes
 
 interface MockQuestion {
   _id: string;
@@ -16,7 +17,9 @@ interface MockQuestion {
 
 const MockTestScreen = () => {
   const navigation = useNavigation<any>();
-  const [timeLeft, setTimeLeft] = useState(DURATION_SECONDS);
+  const mockStore = useMockStore();
+
+  const [timeLeft, setTimeLeft] = useState(DEFAULT_DURATION_SECONDS);
   const [questions, setQuestions] = useState<MockQuestion[]>([]);
   const [mockTestId, setMockTestId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({}); // key is questionId, value is option key
@@ -29,18 +32,33 @@ const MockTestScreen = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    fetchMockTest();
+    loadMockTest();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
-  const fetchMockTest = async () => {
+  const loadMockTest = async () => {
     try {
       setIsLoading(true);
+
+      // Priority 1: Use the mock test data loaded from the template (List Screen)
+      if (mockStore.mockSessionId && mockStore.questions?.length > 0) {
+        setQuestions(mockStore.questions);
+        setMockTestId(mockStore.mockSessionId);
+
+        // Duration is coming in minutes, convert to seconds
+        const durationSec = (mockStore.duration || 20) * 60;
+        setTimeLeft(durationSec);
+        startTimer();
+        return;
+      }
+
+      // Priority 2: Fallback (Legacy/Direct navigation) - Fetch random mock test
       const res = await apiClient.post('/mock/start', {});
       setQuestions(res.data.questions);
       setMockTestId(res.data.mockTestId);
+      setTimeLeft(DEFAULT_DURATION_SECONDS);
       startTimer();
     } catch (error: any) {
       console.error("Failed to start mock test:", error);

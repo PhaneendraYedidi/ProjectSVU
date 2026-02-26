@@ -32,7 +32,7 @@ const MENU_ITEMS = [
     { label: 'Dashboard', icon: 'stats-chart-outline', route: 'Dashboard' },
     { label: 'Practice', icon: 'school-outline', route: 'Practice' },
     { label: 'Challenges', icon: 'trophy-outline', route: 'Challenges' },
-    { label: 'Mock Tests', icon: 'clipboard-outline', route: 'MockTest' },
+    { label: 'Mock Tests', icon: 'clipboard-outline', route: 'MockTestList' },
     { label: 'Bookmarks', icon: 'bookmark-outline', route: 'Bookmarks' },
     { label: 'Referral', icon: 'people-outline', route: 'Referral' },
     { label: 'About', icon: 'information-circle-outline', route: 'About' },

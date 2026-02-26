@@ -1130,7 +1130,7 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNSVG (15.15.0):
+  - RNSVG (15.8.0):
     - React-Core
   - RNVectorIcons (10.0.3):
     - glog
@@ -1419,7 +1419,7 @@ SPEC CHECKSUMS:
   RNKeychain: df33ae4d27df06622fc14190b790ba8749f6be76
   RNReanimated: 1ef68beaad1a8f4cb2a9098d0d3c374a2e3fd51a
   RNScreens: 59f615aa0782077560c8eea46c2daec3a716dba9
-  RNSVG: 5f2c760142c6d59f6ed0e93364fe2dea76e7a7ac
+  RNSVG: 8542aa11770b27563714bbd8494a8436385fc85f
   RNVectorIcons: 102cd20472bf0d7cd15443d43cd87f9c97228ac3
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: a813a6d82538ccba91c54406404e3ed80b48a692
